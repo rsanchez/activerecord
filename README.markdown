@@ -1,6 +1,6 @@
 # Active Record #
 
-Use the CodeIgniter Active Record pattern in an ExpressionEngine plugin. See http://codeigniter.com/user_guide/database/active_record.html#select
+Use the CodeIgniter Active Record pattern in an ExpressionEngine plugin. See <http://codeigniter.com/user_guide/database/active_record.html#select>
 
 ## Installation
 
@@ -38,7 +38,7 @@ multiple where statements
 	where[a]="MATCH (field) AGAINST ('value')"
 	where[b]="MATCH (field2) AGAINST ('value2')"
 	
-like, not_like, or_like, or_not_like
+like, not_like, or_like, or_not_like (use :before or :after to modify the like statement)
 	like:screen_name="Joe"
 	or_like:screen_name="oe:before"
 
