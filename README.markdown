@@ -1,6 +1,6 @@
 # Active Record #
 
-Use the CodeIgniter Active Record pattern in an ExpressionEngine plugin.
+Use the CodeIgniter Active Record pattern in an ExpressionEngine plugin. See http://codeigniter.com/user_guide/database/active_record.html#select
 
 ## Installation
 
@@ -8,7 +8,14 @@ Use the CodeIgniter Active Record pattern in an ExpressionEngine plugin.
 
 ## Usage
 
-	{exp:activerecord select="member_id, username" from="members" where:group_id="1" order_by="screen_name" limit="10" paginate="top"}
+	{exp:activerecord
+		select="member_id, username"
+		from="members"
+		where:group_id="1"
+		order_by="screen_name"
+		limit="10"
+		paginate="top"
+	}
 		{!-- this parses exactly like a query module tag --}
 		{member_id} - {username}<br />
 		{paginate}<p>Page {current_page} of {total_pages} pages {pagination_links}</p>{/paginate}
@@ -20,7 +27,9 @@ You also get these vars:
 	{total_results}
 	{absolute_total_results}
 
-## Other Param Examples
+## Parameters
+
+from* required
 
 a where statement (not key/value pair)
 	where="MATCH (field) AGAINST ('value')"
@@ -33,12 +42,15 @@ like, not_like, or_like, or_not_like
 	like:screen_name="Joe"
 	or_like:screen_name="oe:before"
 
-protect your select
+protect your select statement
 	select="COUNT(*) AS count"
 	protect_select="yes"
 	
 distinct
 	distinct="yes"
+	
+order_by
+	order_by="screen_name"
 	
 joins (on is required with a join, join_type is optional)
 	join="channel_data"

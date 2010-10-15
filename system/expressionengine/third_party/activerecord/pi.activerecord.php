@@ -34,14 +34,14 @@ class Activerecord extends Query
 				
 				case 'distinct':
 				
-					if (preg_match('/^(yes|y|on|1)$/i', $value))//if ($this->_bool_string($value))
+					if (preg_match('/^(yes|y|on|1|true)$/i', $value))//if ($this->_bool_string($value))
 					{
 						call_user_func(array($this->EE->db, $method));
 					}
 					
 					break;
 				
-				case (preg_match('/^(where|or_where):(.*?)/', $method, $match) != 0):
+				case (preg_match('/^(where|or_where):(.+)/', $method, $match) != 0):
 					
 					$method = $match[1];
 					
