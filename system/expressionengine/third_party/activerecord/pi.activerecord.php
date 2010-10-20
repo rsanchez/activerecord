@@ -71,17 +71,13 @@ class Activerecord extends Query
 					
 					break;
 				
-				case (preg_match('/^(like|not_like|or_like|or_not_like):(.+)/', $method, $match) != 0):
+				case (preg_match('/^(like|not_like|or_like|or_not_like):([^:]+):?(.*)/', $method, $match) != 0):
 				
-					$data = explode(':', xss_clean($value));
-					
 					$method = $match[1];
 					
 					$key = $match[2];
 					
-					$value = $data[0];
-					
-					$wildcard_location = (isset($where[1])) ? $where[1] : 'both';
+					$wildcard_location = ( ! empty($match[3]) && in_array($match[3], array('both','before','after'))) ? $match[3] : 'both';
 					
 					call_user_func(array($this->EE->db, $method), $key, $value, $wildcard_location);
 					
@@ -109,6 +105,7 @@ class Activerecord extends Query
 	}
 	
 	/* no longer in use */
+	/*
 	function _parse()
 	{
 		$this->EE->db->select('COUNT(*) AS count', FALSE);
@@ -171,45 +168,88 @@ class Activerecord extends Query
 		
 		$this->return_data = $this->EE->TMPL->parse_variables($this->EE->TMPL->tagdata, $vars);
 	}
+	*/
 	
 	function usage()
 	{
 		ob_start(); 
 ?>
-{exp:activerecord select="member_id, username" from="members" where:group_id="1" order_by="screen_name" limit="10" paginate="top"}
-	{!-- this parses exactly like a query module tag --}
-	{member_id} - {username}<br />
+	{exp:activerecord
+		select="member_id, username"
+		from="members"
+		where:group_id="1"
+		order_by="screen_name"
+		limit="10"
+		paginate="top"
+	}
+		{!-- this parses exactly like a query module tag --}
+		{member_id} - {username}<br />
+		{paginate}<p>Page {current_page} of {total_pages} pages {pagination_links}</p>{/paginate}
+	{/exp:activerecord}
+
+## Variables
+	{your_field_name}
+	{switch="option_one|option_two|option_three"}
+	{count}
+	{total_results}
+	{absolute_total_results}
 	{paginate}<p>Page {current_page} of {total_pages} pages {pagination_links}</p>{/paginate}
-{/exp:activerecord}
 
-// you also get these vars {switch="option_one|option_two|option_three"}, {count}, {total_results}, {absolute_total_results}
+## Conditionals
+	{if no_results}
 
-// a where statement (not key/value pair)
-	where="MATCH (field) AGAINST ('value')"
-	
-// multiple where statements
-	where[a]="MATCH (field) AGAINST ('value')"
-	where[b]="MATCH (field2) AGAINST ('value2')"
-	
-// like, not_like, or_like, or_not_like
-	like:screen_name="Joe"
-	or_like:screen_name="oe:before"
+## Parameters
 
-// protect your select
+# select
+	select="member_id, username"
+
+protect your select statement
 	select="COUNT(*) AS count"
 	protect_select="yes"
+
+# from (required)
+	from="members"
+
+# where
+a where key/value pair
+	where:group_id="1"
+
+a where statement (not key/value pair)
+	where="MATCH (field) AGAINST ('value')"
 	
-// distinct
+multiple where statements
+	where[a]="MATCH (field) AGAINST ('value')"
+	where[b]="MATCH (field2) AGAINST ('value2')"
+
+# like
+# not_like
+# or_like
+# or_not_like
+use :before or :after to modify the location of the wildcard in the like statement
+	like:screen_name="Joe"
+	or_like:screen_name:before="oe"
+	
+# distinct
 	distinct="yes"
 	
-// joins (on is required with a join, join_type is optional)
+# order_by
+	order_by="screen_name"
+	
+# group_by
+	group_by="group_id"
+
+#join
+on is required with a join, join_type is optional
 	join="channel_data"
 	on="channel_data.entry_id = channel_titles.entry_id"
 	join_type="left"
 	
-// where_in, or_where_in, where_not_in, or_where_not_in
+# where_in
+# or_where_in
+# where_not_in
+# or_where_not_in
+separate multiple values with a pipe character
 	where_in:entry_id="1|2|3|4"
-
 <?php
 		$buffer = ob_get_contents();
 		      
@@ -221,7 +261,7 @@ class Activerecord extends Query
 
 $plugin_info = array(
 	'pi_name' => 'Active Record',
-	'pi_version' => '1.0.0',
+	'pi_version' => '1.0.1',
 	'pi_author' => 'Rob Sanchez',
 	'pi_author_url' => 'http://github.com/rsanchez/activerecord',
 	'pi_description' => 'Use the CodeIgniter Active Record pattern in an EE plugin.',
