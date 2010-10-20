@@ -35,17 +35,17 @@ The tag parsing is the equivalent of the Query module tag parsing: <http://expre
 
 ## Parameters
 
-**select**
+**select**  
 	select="member_id, username"
 
 protect your select statement
 	select="COUNT(*) AS count"
 	protect_select="yes"
 
-**from (required)**
+**from (required)**  
 	from="members"
 
-**where**
+**where**  
 a where key/value pair
 	where:group_id="1"
 
@@ -56,32 +56,32 @@ multiple where statements
 	where[a]="MATCH (field) AGAINST ('value')"
 	where[b]="MATCH (field2) AGAINST ('value2')"
 
-**like**
-**not_like**
-**or_like**
-**or_not_like**
+**like**  
+**not_like**  
+**or_like**  
+**or_not_like**  
 use :before or :after to modify the location of the wildcard in the like statement
 	like:screen_name="Joe"
 	or_like:screen_name:before="oe"
 	
-**distinct**
+**distinct**  
 	distinct="yes"
 	
-**order_by**
+**order_by**  
 	order_by="screen_name"
 	
-**group_by**
+**group_by**  
 	group_by="group_id"
 
-**join**
+**join**  
 on is required with a join, join_type is optional
 	join="channel_data"
 	on="channel_data.entry_id = channel_titles.entry_id"
 	join_type="left"
 	
-**where_in**
-**or_where_in**
-**where_not_in**
-**or_where_not_in**
+**where_in**  
+**or_where_in**  
+**where_not_in**  
+**or_where_not_in**  
 separate multiple values with a pipe character
 	where_in:entry_id="1|2|3|4"
