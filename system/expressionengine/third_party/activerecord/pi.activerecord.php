@@ -1,12 +1,14 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-if ( ! class_exists('Query')) require_once(PATH_MOD.'query/mod.query'.EXT);
+require_once PATH_MOD.'query/mod.query'.EXT;
 
 class Activerecord extends Query
 {
-	function Activerecord()
+	public $return_data = '';
+	
+	public function Activerecord()
 	{
-		$this->EE =& get_instance();
+		$this->EE = get_instance();
 		
 		$this->EE->load->helper('security');
 		
@@ -50,6 +52,7 @@ class Activerecord extends Query
 					call_user_func(array($this->EE->db, $method), $key, xss_clean($value));
 					
 					break;
+				
 				case (preg_match('/^(where_in|or_where_in|where_not_in|or_where_not_in):(.+)/', $method, $match) != 0):
 				
 					$method = $match[1];
@@ -61,7 +64,6 @@ class Activerecord extends Query
 					call_user_func(array($this->EE->db, $method), $key, $value);
 					
 					break;
-				
 				
 				case (preg_match('/^(where|or_where).*?/', $method, $match) != 0):
 					
@@ -93,6 +95,11 @@ class Activerecord extends Query
 			);
 		}
 		
+		if ($this->EE->TMPL->fetch_param('limit') && ! preg_match('/'.LD.'paginate'.RD.'(.+?)'.LD.'\/'.'paginate'.RD.'/s', $this->EE->TMPL->tagdata, $match))
+		{
+			$this->EE->db->limit(xss_clean($this->EE->TMPL->fetch_param('limit')));
+		}
+		
 		$this->EE->TMPL->tagparams['sql'] = $this->EE->db->_compile_select();
 		
 		$this->EE->db->_reset_select();
@@ -104,73 +111,7 @@ class Activerecord extends Query
 		$this->return_data = $this->EE->TMPL->swap_var_single('query', $this->EE->TMPL->tagparams['sql'], $this->return_data);
 	}
 	
-	/* no longer in use */
-	/*
-	function _parse()
-	{
-		$this->EE->db->select('COUNT(*) AS count', FALSE);
-		
-		$aboslute_total_results_sql = $this->EE->db->_compile_select(); //gangsta
-		
-		$this->EE->db->_reset_run(array('ar_select' => array()));
-		
-		if ($limit = xss_clean($this->EE->TMPL->fetch_param('limit')))
-		{
-			$this->EE->db->limit($limit);
-		}
-		
-		if ($this->EE->TMPL->fetch_param('offset'))
-		{
-			$this->EE->db->offset(xss_clean($this->EE->TMPL->fetch_param('offset')));
-		}
-		
-		if ($this->EE->TMPL->fetch_param('select'))
-		{
-			$this->EE->db->select(
-				xss_clean($this->EE->TMPL->fetch_param('select')),
-				(preg_match('/^(no|n|off|0)$/i', $this->EE->TMPL->fetch_param('protect_select')) != 0)//$this->EE->TMPL->fetch_param('protect_select'), TRUE)
-			);
-		}
-		
-		$get = $this->EE->db->get();
-		
-		$total_results = $absolute_total_results = $query->num_rows();
-		
-		if ( ! $total_results)
-		{
-			return $this->EE->TMPL->no_results();
-		}
-		
-		if ($total_results == $limit)
-		{
-			//lets get the absolute total results
-			$query = $this->EE->db->query($aboslute_total_results_sql);
-			
-			$aboslute_total_results = $query->row('count');
-		}
-		
-		$vars = array();
-		
-		$count = 1;
-		
-		foreach ($get->result_array() as $row)
-		{
-			$row['count']  = $count++;
-			
-			$row['total_results'] = $total_results;
-			
-			$row['absolute_total_results'] = $aboslute_total_results;
-			
-			$vars[] = $row;
-		}
-		
-		//@TODO pagination
-		
-		$this->return_data = $this->EE->TMPL->parse_variables($this->EE->TMPL->tagdata, $vars);
-	}
-	*/
-	
-	function usage()
+	public static function usage()
 	{
 		ob_start(); 
 ?>
@@ -217,7 +158,7 @@ a where key/value pair
 a where statement (not key/value pair)
 	where="MATCH (field) AGAINST ('value')"
 	
-multiple where statements
+multiple where statements (a and b are just random markers, necessary for proper tag param parsing)
 	where[a]="MATCH (field) AGAINST ('value')"
 	where[b]="MATCH (field2) AGAINST ('value2')"
 
@@ -261,7 +202,7 @@ separate multiple values with a pipe character
 
 $plugin_info = array(
 	'pi_name' => 'Active Record',
-	'pi_version' => '1.0.1',
+	'pi_version' => '1.0.2',
 	'pi_author' => 'Rob Sanchez',
 	'pi_author_url' => 'http://github.com/rsanchez/activerecord',
 	'pi_description' => 'Use the CodeIgniter Active Record pattern in an EE plugin.',
