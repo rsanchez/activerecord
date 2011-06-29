@@ -49,6 +49,10 @@ protect your select statement
 a where key/value pair
 	where:group_id="1"
 
+a where key/value pair with custom comparison operator
+	where:group_id[>=]="6"
+	where_member_id[!=]="1"
+
 a where statement (not key/value pair)
 	where="MATCH (field) AGAINST ('value')"
 	
