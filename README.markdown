@@ -6,7 +6,7 @@ The tag parsing is the equivalent of the Query module tag parsing: <http://expre
 
 ## Installation
 
-* Copy the /system/expressionengine/third_party/activerecord/ folder to your /system/expressionengine/third_party/ folder
+* Copy the /system/expressionengine/third\_party/activerecord/ folder to your /system/expressionengine/third\_party/ folder
 
 ## Usage
 	{exp:activerecord

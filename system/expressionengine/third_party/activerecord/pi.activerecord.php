@@ -2,7 +2,7 @@
 
 $plugin_info = array(
 	'pi_name' => 'Active Record',
-	'pi_version' => '1.0.3',
+	'pi_version' => '1.0.4',
 	'pi_author' => 'Rob Sanchez',
 	'pi_author_url' => 'https://github.com/rsanchez/activerecord',
 	'pi_description' => 'Use the CodeIgniter Active Record pattern in an EE plugin.',
@@ -70,6 +70,20 @@ class Activerecord extends Query
 		
 		foreach ($params as $method => $value)
 		{
+			switch($value)
+			{
+				case '{member_id}':
+				case '{logged_in_member_id}':
+				case 'CURRENT_USER':
+					$value = $this->EE->session->userdata('member_id');
+					break;
+				case '{group_id}':
+				case '{logged_in_group_id}':
+				case '{member_group}':
+					$value = $this->EE->session->userdata('group_id');
+					break;
+			}
+			
 			switch($method)
 			{
 				case 'from':
