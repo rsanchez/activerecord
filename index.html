@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Activerecord by rsanchez</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Activerecord</h1>
+        <p>Use the CodeIgniter Active Record pattern in an ExpressionEngine plugin.</p>
+        <p class="view"><a href="https://github.com/rsanchez/activerecord">View the Project on GitHub <small>rsanchez/activerecord</small></a></p>
+        <ul>
+          <li><a href="https://github.com/rsanchez/activerecord/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/rsanchez/activerecord/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/rsanchez/activerecord">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Active Record</h1>
+
+<p>Use the CodeIgniter Active Record pattern in an ExpressionEngine plugin. See <a href="http://codeigniter.com/user_guide/database/active_record.html#select">http://codeigniter.com/user_guide/database/active_record.html#select</a></p>
+
+<p>The tag parsing is the equivalent of the Query module tag parsing: <a href="http://expressionengine.com/user_guide/modules/query/index.html">http://expressionengine.com/user_guide/modules/query/index.html</a></p>
+
+<h2>Installation</h2>
+
+<ul>
+<li>Copy the /system/expressionengine/third_party/activerecord/ folder to your /system/expressionengine/third_party/ folder</li>
+</ul><h2>Usage</h2>
+
+<pre><code>{exp:activerecord
+    select="member_id, username"
+    from="members"
+    where:group_id="1"
+    order_by="screen_name"
+    limit="10"
+    paginate="top"
+}
+    {!-- this parses exactly like a query module tag --}
+    {member_id} - {username}&lt;br /&gt;
+    {paginate}
+    &lt;p&gt;Page {current_page} of {total_pages} pages {pagination_links}&lt;/p&gt;
+    {/paginate}
+{/exp:activerecord}
+</code></pre>
+
+<h2>Variables</h2>
+
+<pre><code>{your_field_name}
+{switch="option_one|option_two|option_three"}
+{count}
+{total_results}
+{absolute_total_results}
+{paginate}
+&lt;p&gt;Page {current_page} of {total_pages} pages {pagination_links}&lt;/p&gt;
+{/paginate}
+</code></pre>
+
+<h2>Conditionals</h2>
+
+<pre><code>{if no_results}
+</code></pre>
+
+<h2>Parameters</h2>
+
+<p><strong>select</strong></p>
+
+<pre><code>select="member_id, username"
+</code></pre>
+
+<p>Protect your select statement.</p>
+
+<pre><code>select="COUNT(*) AS count"
+protect_select="yes"
+</code></pre>
+
+<p><strong>from (required)</strong></p>
+
+<pre><code>from="members"
+</code></pre>
+
+<p><strong>where</strong></p>
+
+<p>A <code>where</code> key/value pair.</p>
+
+<pre><code>where:group_id="1"
+</code></pre>
+
+<p>A <code>where</code> key/value pair with custom comparison operator.</p>
+
+<pre><code>where:group_id[&gt;=]="6"
+where_member_id[!=]="1"
+</code></pre>
+
+<p>A <code>where</code> statement (not key/value pair).</p>
+
+<pre><code>where="MATCH (field) AGAINST ('value')"
+</code></pre>
+
+<p>Multiple <code>where</code> statements.</p>
+
+<pre><code>where[a]="MATCH (field) AGAINST ('value')"
+where[b]="MATCH (field2) AGAINST ('value2')"
+</code></pre>
+
+<p><strong>like</strong></p>
+
+<p>Use <code>:before</code> or <code>:after</code> to modify the location of the wildcard in the like statement. Use the same syntax for <code>not_like</code>, <code>or_like</code> and <code>or_not_like</code>.</p>
+
+<pre><code>like:screen_name="Joe"
+or_like:screen_name:before="oe"
+</code></pre>
+
+<p><strong>distinct</strong></p>
+
+<pre><code>distinct="yes"
+</code></pre>
+
+<p><strong>order_by</strong></p>
+
+<pre><code>order_by="screen_name asc, group_id desc"
+</code></pre>
+
+<p><strong>group_by</strong></p>
+
+<pre><code>group_by="group_id"
+</code></pre>
+
+<p><strong>join</strong></p>
+
+<p><code>on</code> is required with a join, <code>join_type</code> is optional.</p>
+
+<pre><code>join="channel_data"
+on="channel_data.entry_id = channel_titles.entry_id"
+join_type="left"
+</code></pre>
+
+<p><strong>where_in</strong></p>
+
+<p>Separate multiple values with a pipe character. Use the same syntax for <code>or_where_in</code>, <code>where_not_in</code> and <code>or_where_not_in</code></p>
+
+<pre><code>where_in:entry_id="1|2|3|4"
+</code></pre>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/rsanchez">rsanchez</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    
+  </body>
+</html>
