@@ -1,174 +1,192 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 $plugin_info = array(
-	'pi_name' => 'Active Record',
-	'pi_version' => '1.0.4',
-	'pi_author' => 'Rob Sanchez',
-	'pi_author_url' => 'https://github.com/rsanchez/activerecord',
-	'pi_description' => 'Use the CodeIgniter Active Record pattern in an EE plugin.',
-	'pi_usage' => 'See https://github.com/rsanchez/activerecord'
+    'pi_name' => 'Active Record',
+    'pi_version' => '1.1.0',
+    'pi_author' => 'Rob Sanchez',
+    'pi_author_url' => 'https://github.com/rsanchez/activerecord',
+    'pi_description' => 'Use the CodeIgniter Active Record pattern in an EE plugin.',
+    'pi_usage' => 'See https://github.com/rsanchez/activerecord'
 );
 
-require_once PATH_MOD.'query/mod.query.php';
-
-class Activerecord extends Query
+class Activerecord
 {
-	public $return_data = '';
-	
-	/**
-	 * exp:activerecord plugin tag / constructor
-	 * 
-	 * @return Type    Description
-	 */
-	public function Activerecord()
-	{
-		$this->EE =& get_instance();
-		
-		if ( ! is_array($this->EE->TMPL->tagparams))
-		{
-			$this->EE->TMPL->tagparams = array();
-		}
-		
-		$this->EE->TMPL->tagparams['sql'] = $this->build_query($this->EE->TMPL->tagparams);
-		
-		$this->basic_select();
-		
-		$this->return_data = $this->EE->TMPL->swap_var_single('absolute_total_results', $this->total_rows, $this->return_data);
-	}
-	
-	/**
-	 * Builds a SQL query from tag params
-	 * 
-	 * @param array $params
-	 * @param string|bool $tagdata
-	 * 
-	 * @return string the SQL query created by CI active record
-	 */
-	protected function build_query(array $params, $tagdata = FALSE)
-	{
-		if ($tagdata === FALSE)
-		{
-			$tagdata = (isset($this->EE->TMPL->tagdata)) ? $this->EE->TMPL->tagdata : '';
-		}
-		
-		$this->EE->db->_reset_select();
-		
-		//this needs to be done before the rest
-		if ( ! empty($params['select']))
-		{
-			$this->EE->db->select(
-				$this->EE->security->xss_clean($params['select']),
-				(isset($params['protect_select']) && preg_match('/^(no|n|off|0)$/i', $params['protect_select']) == 0)
-			);
-		}
-		
-		//query module ignores limit if there's no pagination, so we'll add it here
-		if ( ! empty($params['limit']) && ! preg_match('/'.LD.'paginate'.RD.'(.+?)'.LD.'\/'.'paginate'.RD.'/s', $tagdata, $match))
-		{
-			$this->EE->db->limit($this->EE->security->xss_clean($params['limit']));
-		}
-		
-		foreach ($params as $method => $value)
-		{
-			switch($value)
-			{
-				case '{member_id}':
-				case '{logged_in_member_id}':
-				case 'CURRENT_USER':
-					$value = $this->EE->session->userdata('member_id');
-					break;
-				case '{group_id}':
-				case '{logged_in_group_id}':
-				case '{member_group}':
-					$value = $this->EE->session->userdata('group_id');
-					break;
-			}
-			
-			switch($method)
-			{
-				case 'from':
-				case 'order_by':
-				case 'group_by':
-					
-					call_user_func(array($this->EE->db, $method), $this->EE->security->xss_clean($value));
-					
-					break;
-				
-				case ($method === 'join' && $this->EE->TMPL->fetch_param('on')):
-					
-					$this->EE->db->join(
-						$this->EE->security->xss_clean($value),
-						$this->EE->security->xss_clean($this->EE->TMPL->fetch_param('on')),
-						($this->EE->TMPL->fetch_param('join_type')) ? $this->EE->security->xss_clean($this->EE->TMPL->fetch_param('join_type')) : ''
-					);
-					
-					break;
-				
-				case 'distinct':
-				
-					if (preg_match('/^(yes|y|on|1|true)$/i', $value))
-					{
-						call_user_func(array($this->EE->db, $method));
-					}
-					
-					break;
-				
-				case (preg_match('/^(where|or_where):([^\[]+)(\[.*\])?/', $method, $match) != 0):
-					
-					$method = $match[1];
-					
-					$key = $match[2];
-					
-					if ( ! empty($match[3]))
-					{
-						$key .= ' '.substr($match[3], 1, -1);
-					}
-					
-					call_user_func(array($this->EE->db, $method), $key, $value);
-					
-					break;
-				
-				case (preg_match('/^(where_in|or_where_in|where_not_in|or_where_not_in):(.+)/', $method, $match) != 0):
-				
-					$method = $match[1];
-					
-					$key = $match[2];
-					
-					$value = explode('|', $this->EE->security->xss_clean($value));
-					
-					call_user_func(array($this->EE->db, $method), $key, $value);
-					
-					break;
-				
-				case (preg_match('/^(where|or_where).*?/', $method, $match) != 0):
-					
-					$method = $match[1];
-					
-					call_user_func(array($this->EE->db, $method), $this->EE->security->xss_clean($value), NULL, FALSE);
-					
-					break;
-				
-				case (preg_match('/^(like|not_like|or_like|or_not_like):([^:]+):?(.*)/', $method, $match) != 0):
-				
-					$method = $match[1];
-					
-					$key = $match[2];
-					
-					$wildcard_location = ( ! empty($match[3]) && in_array($match[3], array('both','before','after'))) ? $match[3] : 'both';
-					
-					call_user_func(array($this->EE->db, $method), $key, $value, $wildcard_location);
-					
-					break;
-			}
-		}
-		
-		$query = $this->EE->db->_compile_select();
-		
-		$this->EE->db->_reset_select();
-		
-		return $query;
-	}
+    public $return_data = '';
+
+    /**
+     * exp:activerecord plugin tag / constructor
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        foreach (ee()->TMPL->tagparams as $method => $value)
+        {
+            switch($value)
+            {
+                case '{member_id}':
+                case '{logged_in_member_id}':
+                case 'CURRENT_USER':
+                    $value = ee()->session->userdata('member_id');
+                    break;
+                case '{group_id}':
+                case '{logged_in_group_id}':
+                case '{member_group}':
+                    $value = ee()->session->userdata('group_id');
+                    break;
+            }
+
+            switch($method)
+            {
+                case 'from':
+                case 'order_by':
+                case 'group_by':
+
+                    call_user_func(array(ee()->db, $method), ee()->security->xss_clean($value));
+
+                    break;
+
+                case ($method === 'join' && ee()->TMPL->fetch_param('on')):
+
+                    ee()->db->join(
+                        ee()->security->xss_clean($value),
+                        ee()->security->xss_clean(ee()->TMPL->fetch_param('on')),
+                        (ee()->TMPL->fetch_param('join_type')) ? ee()->security->xss_clean(ee()->TMPL->fetch_param('join_type')) : ''
+                    );
+
+                    break;
+
+                case 'distinct':
+
+                    if (preg_match('/^(yes|y|on|1|true)$/i', $value))
+                    {
+                        call_user_func(array(ee()->db, $method));
+                    }
+
+                    break;
+
+                case (preg_match('/^(where|or_where):([^\[]+)(\[.*\])?/', $method, $match) != 0):
+
+                    $method = $match[1];
+
+                    $key = $match[2];
+
+                    if ( ! empty($match[3]))
+                    {
+                        $key .= ' '.substr($match[3], 1, -1);
+                    }
+
+                    call_user_func(array(ee()->db, $method), $key, $value);
+
+                    break;
+
+                case (preg_match('/^(where_in|or_where_in|where_not_in|or_where_not_in):(.+)/', $method, $match) != 0):
+
+                    $method = $match[1];
+
+                    $key = $match[2];
+
+                    $value = explode('|', ee()->security->xss_clean($value));
+
+                    call_user_func(array(ee()->db, $method), $key, $value);
+
+                    break;
+
+                case (preg_match('/^(where|or_where).*?/', $method, $match) != 0):
+
+                    $method = $match[1];
+
+                    call_user_func(array(ee()->db, $method), ee()->security->xss_clean($value), NULL, FALSE);
+
+                    break;
+
+                case (preg_match('/^(like|not_like|or_like|or_not_like):([^:]+):?(.*)/', $method, $match) != 0):
+
+                    $method = $match[1];
+
+                    $key = $match[2];
+
+                    $wildcard_location = ( ! empty($match[3]) && in_array($match[3], array('both','before','after'))) ? $match[3] : 'both';
+
+                    call_user_func(array(ee()->db, $method), $key, $value, $wildcard_location);
+
+                    break;
+            }
+        }
+
+        ee()->db->select('COUNT(*) AS count');
+
+        $count_sql = ee()->db->_compile_select();
+
+        $count_query = ee()->db->query($count_sql);
+
+        $absolute_total_results = $count_query->row('count');
+
+        $count_query->free_result();
+
+        if ($absolute_total_results <= 0)
+        {
+            return $this->return_data = ee()->TMPL->no_results();
+        }
+
+        ee()->db->ar_select = array();
+
+        if ($select = ee()->TMPL->fetch_param('select'))
+        {
+            $protect_select = ee()->TMPL->fetch_param('protect_select');
+
+            ee()->db->select(
+                ee()->security->xss_clean($select),
+                $protect_select && preg_match('/^(no|n|off|0)$/i', $protect_select) === 0
+            );
+        }
+
+        ee()->load->library('pagination');
+
+        $pagination = ee()->pagination->create();
+
+        ee()->TMPL->tagdata = $pagination->prepare(ee()->TMPL->tagdata);
+
+        $limit = ee()->TMPL->fetch_param('limit');
+
+        if ( ! $limit)
+        {
+            $pagination->paginate = FALSE;
+        }
+        else
+        {
+            ee()->db->limit(ee()->security->xss_clean($limit));
+        }
+
+        if ($pagination->paginate)
+        {
+            if (preg_match('#P(\d+)/?$#', ee()->uri->uri_string(), $match))
+            {
+                ee()->db->offset($match[1]);
+            }
+
+            $pagination->build($absolute_total_results, $limit);
+        }
+
+        $query = ee()->db->get();
+
+        if ($query->num_rows() === 0)
+        {
+            return $this->return_data = ee()->TMPL->no_results();
+        }
+
+        $results = $query->result_array();
+
+        $this->return_data = ee()->TMPL->parse_variables(ee()->TMPL->tagdata, $results);
+
+        if ($pagination->paginate === TRUE)
+        {
+            $this->return_data = $pagination->render($this->return_data);
+        }
+
+        $this->return_data = ee()->TMPL->swap_var_single('absolute_total_results', $absolute_total_results, $this->return_data);
+    }
 }
 
-/* End of file pi.activerecord.php */ 
-/* Location: ./system/expressionengine/third_party/activerecord/pi.activerecord.php */ 
+/* End of file pi.activerecord.php */
+/* Location: ./system/expressionengine/third_party/activerecord/pi.activerecord.php */
