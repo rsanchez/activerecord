@@ -76,7 +76,7 @@ A `where` key/value pair with custom comparison operator.
 
 ```
 where:group_id[>=]="6"
-where_member_id[!=]="1"
+where:member_id[!=]="1"
 ```
 
 A `where` statement (not key/value pair).
@@ -88,8 +88,8 @@ where="MATCH (field) AGAINST ('value')"
 Multiple `where` statements.
 
 ```
-where[a]="MATCH (field) AGAINST ('value')"
-where[b]="MATCH (field2) AGAINST ('value2')"
+where[]="MATCH (field) AGAINST ('value')"
+where[]="MATCH (field2) AGAINST ('value2')"
 ```
 
 **like**
@@ -121,12 +121,19 @@ group_by="group_id"
 
 **join**
 
-`on` is required with a join, `join_type` is optional.
+```
+join:channel_data="channel_data.entry_id = channel_titles.entry_id"
+```
+
+Advanced joins:
 
 ```
-join="channel_data"
-on="channel_data.entry_id = channel_titles.entry_id"
-join_type="left"
+left_join:channel_data="channel_data.entry_id = channel_titles.entry_id"
+right_join:channel_data="channel_data.entry_id = channel_titles.entry_id"
+outer_join:channel_data="channel_data.entry_id = channel_titles.entry_id"
+inner_join:channel_data="channel_data.entry_id = channel_titles.entry_id"
+left_outer_join:channel_data="channel_data.entry_id = channel_titles.entry_id"
+right_outer_join:channel_data="channel_data.entry_id = channel_titles.entry_id"
 ```
 
 **where_in**

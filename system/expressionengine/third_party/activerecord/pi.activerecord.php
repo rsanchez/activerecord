@@ -2,7 +2,7 @@
 
 $plugin_info = array(
     'pi_name' => 'Active Record',
-    'pi_version' => '1.1.0',
+    'pi_version' => '1.1.1',
     'pi_author' => 'Rob Sanchez',
     'pi_author_url' => 'https://github.com/rsanchez/activerecord',
     'pi_description' => 'Use the CodeIgniter Active Record pattern in an EE plugin.',
@@ -45,6 +45,36 @@ class Activerecord
                     call_user_func(array(ee()->db, $method), ee()->security->xss_clean($value));
 
                     break;
+
+                case 'where[]':
+                	preg_match_all('/\swhere\[\]=([\042\047])(.*?)\\1/', ee()->TMPL->tagproper, $matches);
+
+                	foreach ($matches[2] as $value)
+                	{
+                		ee()->db->where(ee()->security->xss_clean($value), NULL, FALSE);
+                	}
+
+                	break;
+
+                case 'or_where[]':
+                	preg_match_all('/or_where\[\]=([\042\047])(.*?)\\1/', ee()->TMPL->tagproper, $matches);
+
+                	foreach ($matches[2] as $value)
+                	{
+                		ee()->db->or_where(ee()->security->xss_clean($value), NULL, FALSE);
+                	}
+
+                	break;
+
+                case (preg_match('/^(left_outer_|right_outer|outer_|inner_|right_|left_)?join:(.*?)$/', $method, $match) != 0):
+
+                    ee()->db->join(
+                        ee()->security->xss_clean($match[2]),
+                        ee()->security->xss_clean($value),
+                        rtrim(str_replace('_', ' ', $match[1]), '_')
+                    );
+
+                	break;
 
                 case ($method === 'join' && ee()->TMPL->fetch_param('on')):
 
