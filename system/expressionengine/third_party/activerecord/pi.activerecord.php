@@ -156,6 +156,8 @@ class Activerecord
 
         if ($absolute_total_results <= 0)
         {
+            ee()->db->_reset_select();
+
             return $this->return_data = ee()->TMPL->no_results();
         }
 
