@@ -2,7 +2,7 @@
 
 $plugin_info = array(
     'pi_name' => 'Active Record',
-    'pi_version' => '1.1.1',
+    'pi_version' => '1.1.2',
     'pi_author' => 'Rob Sanchez',
     'pi_author_url' => 'https://github.com/rsanchez/activerecord',
     'pi_description' => 'Use the CodeIgniter Active Record pattern in an EE plugin.',
